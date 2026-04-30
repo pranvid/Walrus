@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Walrus — AI Companion Marketplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    /* ── Reset ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { height: 100%; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F9F9F7; }
+
+    /* ── Design Tokens ──────────────────────────────── */
+    :root {
+      --text-xs:    0.75rem;
+      --text-sm:    0.875rem;
+      --text-base:  1rem;
+      --text-lg:    1.125rem;
+      --text-xl:    1.25rem;
+      --text-2xl:   1.5rem;
+      --text-3xl:   1.875rem;
+      --text-4xl:   2.25rem;
+      --text-5xl:   2.75rem;
+      --leading-tight:   1.15;
+      --leading-snug:    1.3;
+      --leading-normal:  1.5;
+      --leading-relaxed: 1.75;
+      --space-1:  4px;  --space-2:  8px;  --space-3:  12px; --space-4:  16px;
+      --space-5:  20px; --space-6:  24px; --space-8:  32px; --space-10: 40px;
+      --space-12: 48px; --space-16: 64px; --space-20: 80px;
+      --page-pad: var(--space-20);
+      --c-text:         #1A1A1A;
+      --c-text-sub:     #4B4B52;
+      --c-text-muted:   #636369;
+      --c-text-caption: #8A8A91;
+      --c-surface:      #FFFFFF;
+      --c-bg:           #F9F9F7;
+      --c-border:       #E2E2E0;
+      --c-border-subtle:#EFEFED;
+      --c-accent:       #0A7E74;
+      --c-accent-hover: #096A61;
+      --c-on-dark:       #FFFFFF;
+      --c-on-dark-sub:   rgba(255,255,255,0.82);
+      --c-on-dark-muted: rgba(255,255,255,0.60);
+    }
+
+    /* ── Typography ─────────────────────────────────── */
+    .t-h1     { font-size: var(--text-5xl); font-weight: 800; line-height: var(--leading-tight);   letter-spacing: -0.04em;  color: var(--c-text); }
+    .t-h2     { font-size: var(--text-3xl); font-weight: 700; line-height: var(--leading-snug);    letter-spacing: -0.02em;  color: var(--c-text); }
+    .t-h3     { font-size: var(--text-xl);  font-weight: 700; line-height: var(--leading-snug);    color: var(--c-text); }
+    .t-body-lg{ font-size: var(--text-lg);  font-weight: 400; line-height: var(--leading-relaxed); color: var(--c-text-sub); }
+    .t-body   { font-size: var(--text-base);font-weight: 400; line-height: var(--leading-normal);  color: var(--c-text-sub); }
+    .t-body-sm{ font-size: var(--text-sm);  font-weight: 400; line-height: var(--leading-normal);  color: var(--c-text-sub); }
+    .t-label  { font-size: var(--text-sm);  font-weight: 600; line-height: var(--leading-normal);  color: var(--c-text); }
+    .t-caption{ font-size: var(--text-xs);  font-weight: 500; line-height: var(--leading-normal);  color: var(--c-text-muted); }
+
+    /* ── Hero ───────────────────────────────────────── */
+    .hero-badge { display: inline-flex; align-items: center; gap: var(--space-2); background: rgba(13,148,136,0.15); color: #2DD4BF; padding: var(--space-1) var(--space-3); border-radius: 20px; font-size: var(--text-xs); font-weight: 700; border: 1px solid rgba(13,148,136,0.25); letter-spacing: 0.05em; margin-bottom: var(--space-6); white-space: nowrap; }
+    .hero-title { font-size: var(--text-5xl); font-weight: 800; color: var(--c-on-dark); letter-spacing: -0.04em; line-height: var(--leading-tight); margin-bottom: var(--space-5); }
+    .hero-sub   { font-size: var(--text-base); color: var(--c-on-dark-sub); line-height: var(--leading-relaxed); max-width: 460px; margin-bottom: var(--space-8); }
+    .page-pad { padding-left: var(--page-pad); padding-right: var(--page-pad); }
+
+    /* ── Animations ─────────────────────────────────── */
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40%           { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* ── Scrollbar ──────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 10px; }
+
+    /* ── Responsive ─────────────────────────────────── */
+    @media (max-width: 1280px) { :root { --page-pad: var(--space-12); } }
+    @media (max-width: 1024px) {
+      :root { --page-pad: var(--space-10); --text-5xl: 2.25rem; }
+      .hero-preview-col { display: none !important; }
+      .hero-content-inner { min-height: auto !important; }
+    }
+    @media (max-width: 768px) {
+      :root { --page-pad: var(--space-5); --text-5xl: 1.875rem; --text-4xl: 1.5rem; }
+      .hero-sub { font-size: var(--text-sm); max-width: 100%; }
+      .hero-preview-col { display: none !important; }
+      .hero-content-inner { min-height: auto !important; height: auto !important; padding-bottom: var(--space-10) !important; }
+      .nav-inner { padding-left: var(--space-5) !important; padding-right: var(--space-5) !important; }
+      .nav-sign-up span { display: none; }
+      .card-grid { grid-template-columns: 1fr !important; }
+      .filter-bar-inner { flex-wrap: wrap !important; }
+      .filter-chips { flex-wrap: wrap !important; }
+      .filter-industry { width: 100% !important; }
+      .social-proof-bar { flex-wrap: wrap; gap: var(--space-3) !important; }
+      .social-proof-stats { display: none !important; }
+      .hero-pills { display: none !important; }
+    }
+    @media (max-width: 480px) {
+      .nav-no-signup { display: none !important; }
+      .nav-signup-btn { padding: var(--space-2) var(--space-3) !important; font-size: var(--text-sm) !important; }
+      .card-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .card-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .hero-content-inner { height: auto !important; min-height: 360px !important; }
+    }
+
+    /* ── Nav links ──────────────────────────────────── */
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px; font-weight: 500;
+      color: rgba(255,255,255,0.72);
+      padding: 7px 13px; border-radius: 8px;
+      transition: color 0.14s, background 0.14s;
+      white-space: nowrap;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    .nav-start-free {
+      background: #0A7E74; color: #fff; border: none;
+      padding: 9px 20px; border-radius: 9px;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.14s, transform 0.12s;
+      white-space: nowrap;
+    }
+    .nav-start-free:hover { background: #096A61; transform: translateY(-1px); }
+    .nav-logo-btn { background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none !important; }
+    }
+    @media (max-width: 640px) {
+      .nav-start-free { padding: 8px 14px !important; font-size: 13px !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ─── Companion Data ───────────────────────────────────────────────────────────
+const COMPANIONS = [
+  { id: 1, name: "Demo Presenter", shortDesc: "Generate live canvas presentations from WhatsApp", desc: "Generates live canvas presentations directly from WhatsApp messages. Great for sales teams and consultants on the go.", industry: "All Industries", goal: "Live Demo", hue: 245, emoji: "📊", sampleQ: ["Show me a product demo", "Create a presentation", "What can you present?"], preview: { agentName: "Alex", siteTitle: "Spark Consulting", siteSub: "Strategy. Execution. Results.", siteCTA: "Get a Live Demo", siteColor: "#6366F1" } },
+  { id: 2, name: "Admission Counselor", shortDesc: "Course inquiries, enrollment leads", desc: "Handles student inquiries, qualifies enrollment interest, schedules counselor calls, and captures lead details 24/7.", industry: "Education", goal: "Lead Generation", hue: 210, emoji: "🎓", sampleQ: ["What courses do you offer?", "How do I apply?", "What are the fees?"], preview: { agentName: "Priya", siteTitle: "Vidya Institute of Technology", siteSub: "Shape your future with world-class education.", siteCTA: "Apply Now →", siteColor: "#0EA5E9" } },
+  { id: 3, name: "Showroom Assistant", shortDesc: "Test drive bookings, spec queries", desc: "Books test drives, answers vehicle queries, captures buyer intent, and routes hot leads to your sales team.", industry: "Automotive", goal: "Lead Generation", hue: 25, emoji: "🚗", sampleQ: ["Book a test drive", "What models are available?", "EMI options?"], preview: { agentName: "Raj", siteTitle: "AutoElite Motors", siteSub: "Drive your dream car today.", siteCTA: "Book a Test Drive", siteColor: "#F97316" } },
+  { id: 4, name: "Lead Qualifier", shortDesc: "Capture & score marketing leads", desc: "Engages inbound visitors, asks qualifying questions, scores leads by intent, and routes them to the right rep.", industry: "Professional Services", goal: "Lead Generation", hue: 160, emoji: "🎯", sampleQ: ["Tell me about your services", "I need a quote", "How do you work?"], preview: { agentName: "Ananya", siteTitle: "GrowthFirst Agency", siteSub: "Marketing that drives real results.", siteCTA: "Get a Free Quote", siteColor: "#10B981" } },
+  { id: 5, name: "Energy Calculator Bot", shortDesc: "Rooftop assessment, quote requests", desc: "Walks homeowners through a rooftop assessment, calculates potential savings, and schedules a site visit.", industry: "Manufacturing", goal: "Lead Generation", hue: 45, emoji: "⚡", sampleQ: ["How much can I save?", "Is my rooftop suitable?", "Installation cost?"], preview: { agentName: "Vikram", siteTitle: "SolarSmart India", siteSub: "Switch to solar. Save more every month.", siteCTA: "Calculate Savings", siteColor: "#EAB308" } },
+  { id: 6, name: "Policy Advisor", shortDesc: "Coverage inquiries, premium quotes", desc: "Explains policy options, answers coverage questions, generates instant premium estimates, and books agent calls.", industry: "Finance & Insurance", goal: "Client Servicing", hue: 200, emoji: "🛡️", sampleQ: ["What policies do you offer?", "Get me a quote", "What's covered?"], preview: { agentName: "Meera", siteTitle: "SecureLife Insurance", siteSub: "Protect what matters most.", siteCTA: "Get a Quote", siteColor: "#3B82F6" } },
+  { id: 7, name: "Plan Support Bot", shortDesc: "Bill queries, plan change requests", desc: "Resolves billing queries, handles plan upgrade/downgrade requests, and escalates complex issues to support agents.", industry: "Professional Services", goal: "Client Servicing", hue: 280, emoji: "📱", sampleQ: ["My bill looks wrong", "Upgrade my plan", "Next billing date?"], preview: { agentName: "Arjun", siteTitle: "ConnectPro Telecom", siteSub: "Stay connected. Always.", siteCTA: "Manage My Plan", siteColor: "#8B5CF6" } },
+  { id: 8, name: "Patient Care Bot", shortDesc: "Reports, refills, appointments", desc: "Helps patients access reports, request prescription refills, book follow-up appointments, and get discharge summaries.", industry: "Healthcare", goal: "Client Servicing", hue: 170, emoji: "🏥", sampleQ: ["Book an appointment", "Get my lab reports", "Prescription refill"], preview: { agentName: "Kavya", siteTitle: "Wellness Multispecialty Clinic", siteSub: "Your health, our priority.", siteCTA: "Book Appointment", siteColor: "#0D9488" } },
+  { id: 9, name: "Property Inquiry Bot", shortDesc: "Qualify buyers, schedule site visits", desc: "Qualifies property buyers by budget and preference, schedules site visits, and sends brochures automatically.", industry: "Real Estate", goal: "Lead Generation", hue: 35, emoji: "🏠", sampleQ: ["Show me 3BHK properties", "Schedule a site visit", "Price range?"], preview: { agentName: "Priya", siteTitle: "Premium Apartments & Villas in Pune", siteSub: "Find Your Perfect Property", siteCTA: "Get Started →", siteColor: "#3B82F6" } },
+  { id: 10, name: "Clinic Appointment Bot", shortDesc: "Patient inquiries, booking leads", desc: "Manages appointment bookings, doctor availability, and patient pre-screening for multi-specialty clinics.", industry: "Healthcare", goal: "Smooth Communications", hue: 195, emoji: "🩺", sampleQ: ["Book with a doctor", "Clinic hours?", "I need a checkup"], preview: { agentName: "Dr. Mia", siteTitle: "HealthFirst Multispecialty", siteSub: "Expert care, every step of the way.", siteCTA: "Book Now", siteColor: "#06B6D4" } },
+  { id: 11, name: "Event Inquiry Bot", shortDesc: "Capture leads, budget qualify", desc: "Handles event inquiries, captures venue and catering requirements, and qualifies budgets for your sales team.", industry: "Events & Weddings", goal: "Lead Generation", hue: 330, emoji: "🎉", sampleQ: ["I'm planning a wedding", "Venue capacity?", "Corporate events?"], preview: { agentName: "Ananya", siteTitle: "Royal Events & Celebrations", siteSub: "Making every occasion unforgettable.", siteCTA: "Plan My Event", siteColor: "#EC4899" } },
+  { id: 12, name: "Design Consultation Bot", shortDesc: "Project scope, budget qualification", desc: "Engages design leads, scopes project requirements, qualifies budgets, and schedules discovery calls with designers.", industry: "Professional Services", goal: "Lead Generation", hue: 260, emoji: "🎨", sampleQ: ["Interior design help", "Your pricing?", "Redesign my office?"], preview: { agentName: "Ishaan", siteTitle: "Artify Interior Design", siteSub: "Beautiful spaces, thoughtfully designed.", siteCTA: "Start Your Project", siteColor: "#A855F7" } },
+  { id: 13, name: "Trip Planner Bot", shortDesc: "Destination queries, package leads", desc: "Builds custom travel itineraries, suggests packages based on budget, and captures booking intent for your team.", industry: "Travel & Hospitality", goal: "Lead Generation", hue: 195, emoji: "✈️", sampleQ: ["Plan a Goa trip for 2", "Maldives packages?", "Family trip under ₹1L?"], preview: { agentName: "Riya", siteTitle: "WanderIndia Holidays", siteSub: "Explore India. Your way.", siteCTA: "Plan My Trip", siteColor: "#06B6D4" } },
+  { id: 14, name: "Order Tracker", shortDesc: "Shipping updates, return requests", desc: "Provides real-time order status, handles return and refund requests, and escalates delivery exceptions automatically.", industry: "Retail & Commerce", goal: "Client Servicing", hue: 15, emoji: "📦", sampleQ: ["Where's my order?", "Return an item", "Package is delayed"], preview: { agentName: "Rohan", siteTitle: "QuickCart Online Store", siteSub: "Shop smarter. Delivered faster.", siteCTA: "Track My Order", siteColor: "#F97316" } },
+  { id: 15, name: "Loan Status Bot", shortDesc: "EMI queries, document collection", desc: "Answers loan status queries, helps with document submission, calculates EMIs, and handles foreclosure requests.", industry: "Finance & Banking", goal: "Client Servicing", hue: 230, emoji: "🏦", sampleQ: ["Outstanding amount?", "EMI calculator", "Submit documents"], preview: { agentName: "Aditya", siteTitle: "FastFunds Finance", siteSub: "Quick loans. Simple process.", siteCTA: "Check Your Loan", siteColor: "#6366F1" } },
+  { id: 16, name: "Customer Success Bot", shortDesc: "Feature queries, retention support", desc: "Answers product questions, helps users get more value from features, and flags churn signals to your CS team.", industry: "SaaS & Tech", goal: "Smooth Communications", hue: 160, emoji: "💬", sampleQ: ["Set up integrations?", "Thinking of cancelling", "What's new?"], preview: { agentName: "Neha", siteTitle: "ProStack SaaS Platform", siteSub: "Build, automate, grow — all in one.", siteCTA: "Explore Features", siteColor: "#10B981" } },
+];
+
+const GOALS = ["All", "Lead Generation", "Client Servicing", "Smooth Communications", "Live Demo"];
+const INDUSTRIES = ["All Industries", "Education", "Automotive", "Healthcare", "Real Estate", "Finance & Insurance", "Finance & Banking", "Professional Services", "Manufacturing", "Retail & Commerce", "Travel & Hospitality", "Events & Weddings", "SaaS & Tech"];
+
+function hueToColor(hue, l = 52, c = 0.14) { return `oklch(${l}% ${c} ${hue})`; }
+function hueToBg(hue) { return `oklch(95% 0.04 ${hue})`; }
+function hueToBorder(hue) { return `oklch(88% 0.06 ${hue})`; }
+
+// ─── Simulated Chat Responses ─────────────────────────────────────────────────
+// Replaces window.claude.complete() with realistic contextual replies
+const FOLLOW_UPS = {
+  "Lead Generation": [
+    "Could you share your name and contact number so our team can get back to you?",
+    "That's great! Let me connect you with the right specialist. What's the best time to reach you?",
+    "I'd love to help with that. Can I ask a few quick questions to find the best fit for you?",
+  ],
+  "Client Servicing": [
+    "I've noted your request. Can you share your registered email or account number so I can pull up your details?",
+    "I understand. Let me look that up for you — this will just take a moment.",
+    "Got it! I've flagged this for our team. You'll receive an update within 24 hours.",
+  ],
+  "Smooth Communications": [
+    "Happy to help! Could you give me a bit more detail so I can assist you better?",
+    "Sure thing. Let me check on that and get back to you right away.",
+    "Thanks for reaching out! I'll make sure the right person follows up with you shortly.",
+  ],
+  "Live Demo": [
+    "Great choice! I can put together a tailored demo for you. What's your main use case?",
+    "I'll generate a live presentation now. Any specific data points you'd like to highlight?",
+    "Perfect! Give me a moment — your live canvas is being created.",
+  ],
+};
+
+function simulateReply(companion, userMessage, messageCount) {
+  const msg = userMessage.toLowerCase();
+  // Check if the message matches a sample question
+  for (let i = 0; i < companion.sampleQ.length; i++) {
+    const sq = companion.sampleQ[i].toLowerCase();
+    if (msg.includes(sq.split(' ')[0]) || sq.includes(msg.split(' ')[0])) {
+      const goalReplies = FOLLOW_UPS[companion.goal] || FOLLOW_UPS["Smooth Communications"];
+      return goalReplies[i % goalReplies.length];
+    }
+  }
+  // Generic contextual replies based on message count
+  const goalReplies = FOLLOW_UPS[companion.goal] || FOLLOW_UPS["Smooth Communications"];
+  return goalReplies[messageCount % goalReplies.length];
+}
+
+async function simulateChat(companion, userMessage, messageCount) {
+  // Simulate network delay
+  await new Promise(r => setTimeout(r, 900 + Math.random() * 600));
+  return simulateReply(companion, userMessage, messageCount);
+}
+
+// ─── Logo ─────────────────────────────────────────────────────────────────────
+function WalrusLogo({ light }) {
+  const c = light ? '#fff' : 'var(--c-text)';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="9" fill="#0A7E74" />
+        <path d="M7 10 L10.5 22 L16 14 L21.5 22 L25 10" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      </svg>
+      <span style={{ fontWeight: 800, fontSize: 18, color: c, letterSpacing: '-0.5px' }}>Walrus</span>
+    </div>
+  );
+}
+
+// ─── Signup Modal ─────────────────────────────────────────────────────────────
+function SignupModal({ onClose }) {
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState('');
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, backdropFilter: 'blur(6px)' }}>
+      <div style={{ width: 400, background: '#fff', borderRadius: 20, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.25)', position: 'relative' }}>
+        <div style={{ background: 'linear-gradient(140deg, #0F172A 0%, #0D2E2B 100%)', padding: '36px 32px 30px', textAlign: 'center' }}>
+          <div style={{ width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <svg width="48" height="48" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="9" fill="#0A7E74" /><path d="M7 10 L10.5 22 L16 14 L21.5 22 L25 10" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Start with Walrus</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 6 }}>Deploy your companion in 5 minutes</div>
+        </div>
+        <div style={{ padding: '28px 32px 32px' }}>
+          {step === 1 ? (
+            <>
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--c-text)', display: 'block', marginBottom: 6 }}>Work email</label>
+                <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E8E8E5', borderRadius: 10, fontSize: 14, fontFamily: 'Plus Jakarta Sans, sans-serif', outline: 'none' }} />
+              </div>
+              <button onClick={() => setStep(2)} style={{ width: '100%', padding: '12px', background: '#0A7E74', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: 'inherit' }}>Continue →</button>
+              <div style={{ textAlign: 'center', marginTop: 14, fontSize: 14, color: 'var(--c-text-muted)' }}>Free to start · ₹9k/mo after · Cancel anytime</div>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '12px 0' }}>
+              <div style={{ fontSize: 44, marginBottom: 14 }}>🎉</div>
+              <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--c-text)', marginBottom: 8 }}>You're in!</div>
+              <div style={{ fontSize: 14, color: 'var(--c-text-muted)', lineHeight: 1.6, marginBottom: 22 }}>Check your email to continue setting up your companion.</div>
+              <button onClick={onClose} style={{ padding: '10px 28px', background: '#0A7E74', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>Done</button>
+            </div>
+          )}
+        </div>
+        <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', color: '#fff', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>×</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Website Preview Modal ────────────────────────────────────────────────────
+function WebsitePreviewModal({ companion, onClose, onUse }) {
+  const accent = hueToColor(companion.hue);
+  const { agentName, siteTitle, siteSub, siteCTA, siteColor } = companion.preview;
+
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [showCTA, setShowCTA] = useState(false);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (messages.length >= 3) setShowCTA(true);
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages]);
+
+  const startChat = () => {
+    setStarted(true);
+    setMessages([{ role: 'assistant', text: `Hi! I'm ${agentName}. ${companion.desc.split('.')[0]}. How can I help you today?` }]);
+  };
+
+  const send = async (text) => {
+    if (!text.trim() || loading) return;
+    const newMessages = [...messages, { role: 'user', text }];
+    setMessages(newMessages);
+    setInput('');
+    setLoading(true);
+    try {
+      const reply = await simulateChat(companion, text, newMessages.length);
+      setMessages(m => [...m, { role: 'assistant', text: reply }]);
+    } catch (e) {
+      setMessages(m => [...m, { role: 'assistant', text: "I'm having trouble right now. Please try again!" }]);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(8,12,24,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, backdropFilter: 'blur(8px)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0, width: 820, maxHeight: '90vh' }}>
+        {/* Header label */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 9, background: hueToBg(companion.hue), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>{companion.emoji}</div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>{companion.name}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>Preview · See how it looks on your website</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <button onClick={onUse} style={{ background: accent, color: '#fff', border: 'none', padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Use This Companion →</button>
+            <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: 30, height: 30, cursor: 'pointer', color: '#fff', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+          </div>
+        </div>
+
+        {/* Mock website frame */}
+        <div style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', height: 560, position: 'relative' }}>
+          {/* Mock browser bar */}
+          <div style={{ background: '#F3F3F3', borderBottom: '1px solid #E0E0E0', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <div style={{ display: 'flex', gap: 5 }}>
+              {['#FF5F57','#FEBC2E','#28C840'].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }}></div>)}
+            </div>
+            <div style={{ flex: 1, background: '#E8E8E8', borderRadius: 6, padding: '4px 12px', fontSize: 11, color: '#888', textAlign: 'center' }}>
+              {siteTitle.toLowerCase().replace(/\s+/g, '').slice(0, 14)}.com
+            </div>
+          </div>
+
+          {/* Website content */}
+          <div style={{ flex: 1, overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+            {/* Hero section */}
+            <div style={{ background: `linear-gradient(160deg, ${siteColor}12 0%, ${siteColor}06 100%)`, padding: '32px 40px 28px', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
+              {/* Mock nav */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+                <div style={{ width: 80, height: 10, background: '#D0D0D0', borderRadius: 4 }}></div>
+                <div style={{ display: 'flex', gap: 16 }}>
+                  {[60, 50, 55, 70].map((w, i) => <div key={i} style={{ width: w, height: 8, background: '#E0E0E0', borderRadius: 4 }}></div>)}
+                </div>
+              </div>
+              {/* Hero text */}
+              <div style={{ textAlign: 'center', maxWidth: 480, margin: '0 auto' }}>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#18181B', marginBottom: 8, letterSpacing: '-0.5px', fontFamily: 'Plus Jakarta Sans, sans-serif', lineHeight: 1.2 }}>{siteTitle}</div>
+                <div style={{ fontSize: 13, color: '#71717A', marginBottom: 18, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{siteSub}</div>
+                <div style={{ display: 'inline-block', background: siteColor, color: '#fff', padding: '9px 22px', borderRadius: 22, fontSize: 13, fontWeight: 700, fontFamily: 'Plus Jakarta Sans, sans-serif', cursor: 'default' }}>{siteCTA}</div>
+              </div>
+            </div>
+
+            {/* Website body placeholder */}
+            <div style={{ flex: 1, padding: '24px 40px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, alignContent: 'start', background: '#fff' }}>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} style={{ borderRadius: 10, border: '1px solid #F0F0F0', padding: 14 }}>
+                  <div style={{ width: '100%', height: 52, background: '#F5F5F5', borderRadius: 7, marginBottom: 10 }}></div>
+                  <div style={{ width: '80%', height: 8, background: '#EBEBEB', borderRadius: 4, marginBottom: 6 }}></div>
+                  <div style={{ width: '60%', height: 7, background: '#F0F0F0', borderRadius: 4 }}></div>
+                </div>
+              ))}
+            </div>
+
+            {/* Chat widget */}
+            <div style={{ position: 'absolute', bottom: 20, right: 20, width: 300, background: '#fff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.18)', border: '1px solid rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', maxHeight: started ? 400 : 'auto', fontFamily: 'Plus Jakarta Sans, sans-serif', transition: 'max-height 0.3s ease' }}>
+              {/* Chat header */}
+              <div style={{ background: siteColor, padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>{agentName}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#A7F3D0', display: 'inline-block' }}></span>
+                    Online now
+                  </div>
+                </div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, cursor: 'pointer' }}>×</div>
+              </div>
+
+              {!started ? (
+                <div style={{ padding: '14px' }}>
+                  <div style={{ fontSize: 12, color: '#71717A', marginBottom: 10, lineHeight: 1.5 }}>
+                    Hi! I'm {agentName}. How can I help you today?
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 12 }}>
+                    {companion.sampleQ.map((q, i) => (
+                      <button key={i} onClick={() => { startChat(); setTimeout(() => send(q), 300); }} style={{ padding: '8px 12px', borderRadius: 8, border: `1.5px solid ${siteColor}22`, background: `${siteColor}08`, color: '#18181B', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', fontWeight: 500, transition: 'all 0.12s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = `${siteColor}15`; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = `${siteColor}08`; }}>
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <input onClick={startChat} placeholder="Type your message..." readOnly style={{ flex: 1, padding: '8px 10px', border: '1.5px solid #EBEBEA', borderRadius: 8, fontSize: 12, fontFamily: 'inherit', outline: 'none', background: '#F9F9F7', cursor: 'text' }} />
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: siteColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M14 8L2 2l2 6-2 6 12-6z" fill="white"/></svg>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 270, background: '#FAFAF9' }}>
+                    {messages.map((msg, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                        <div style={{ maxWidth: '82%', padding: '7px 10px', borderRadius: msg.role === 'user' ? '12px 12px 3px 12px' : '12px 12px 12px 3px', background: msg.role === 'user' ? siteColor : '#fff', color: msg.role === 'user' ? '#fff' : '#18181B', fontSize: 12, lineHeight: 1.5, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>{msg.text}</div>
+                      </div>
+                    ))}
+                    {loading && (
+                      <div style={{ display: 'flex' }}>
+                        <div style={{ background: '#fff', padding: '8px 10px', borderRadius: '12px 12px 12px 3px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                          <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+                            {[0,1,2].map(i => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: '#CBD5E1', animation: `dotBounce 1.2s ${i*0.2}s ease-in-out infinite` }}></div>)}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {showCTA && (
+                    <div style={{ padding: '8px 12px', background: accent, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ fontSize: 11, color: '#fff', fontWeight: 700 }}>Deploy on your site</div>
+                      <button onClick={onUse} style={{ background: '#fff', color: accent, border: 'none', padding: '5px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Use This →</button>
+                    </div>
+                  )}
+                  <div style={{ padding: '8px 10px', borderTop: '1px solid #EBEBEA', display: 'flex', gap: 6, background: '#fff' }}>
+                    <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send(input)}
+                      placeholder="Type a message..."
+                      style={{ flex: 1, padding: '7px 10px', border: '1.5px solid #EBEBEA', borderRadius: 8, fontSize: 12, fontFamily: 'inherit', outline: 'none', background: '#F9F9F7' }} />
+                    <button onClick={() => send(input)} disabled={!input.trim() || loading} style={{ width: 30, height: 30, borderRadius: 8, background: siteColor, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: input.trim() ? 1 : 0.4, flexShrink: 0 }}>
+                      <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M14 8L2 2l2 6-2 6 12-6z" fill="white"/></svg>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Hero Preview Card ────────────────────────────────────────────────────────
+const HERO_PREVIEWS = [
+  { companion: COMPANIONS[8], chatMsg: "I'm looking for a 3BHK in Pune under ₹80L", reply: "Great! I have 12 options matching your budget. Shall I schedule site visits for the top 3?" },
+  { companion: COMPANIONS[10], chatMsg: "I want to plan a wedding for 200 guests", reply: "Wonderful! We specialise in weddings up to 500 guests. What date are you considering?" },
+  { companion: COMPANIONS[1], chatMsg: "What engineering courses do you offer?", reply: "We offer B.Tech in 8 specialisations. The next batch starts August 2025. Want me to send the brochure?" },
+  { companion: COMPANIONS[2], chatMsg: "Can I book a test drive for the new SUV?", reply: "Absolutely! Our new Crest SUV is available for test drives this weekend. Which location suits you?" },
+];
+
+function HeroPreviewCard({ preview }) {
+  const { companion, chatMsg, reply } = preview;
+  const { agentName, siteColor } = companion.preview;
+  const bg = hueToBg(companion.hue);
+  return (
+    <div style={{ width: 280, background: '#fff', borderRadius: 18, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.35)', fontFamily: 'Plus Jakarta Sans, sans-serif', height: 320, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ background: siteColor, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{companion.emoji}</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>{agentName}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#A7F3D0', display: 'inline-block' }}></span>
+            Online now · {companion.name}
+          </div>
+        </div>
+        <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 16 }}>×</div>
+      </div>
+      <div style={{ padding: '16px', background: '#F9F9F7', display: 'flex', flexDirection: 'column', gap: 10, flex: 1, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', gap: 7 }}>
+          <div style={{ width: 24, height: 24, borderRadius: 7, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, flexShrink: 0, alignSelf: 'flex-end' }}>{companion.emoji}</div>
+          <div style={{ background: '#fff', padding: '8px 12px', borderRadius: '12px 12px 12px 3px', fontSize: 13, lineHeight: 1.5, color: 'var(--c-text)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', maxWidth: '80%' }}>
+            Hi! I'm {agentName}. {companion.shortDesc}. How can I help?
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ background: siteColor, color: '#fff', padding: '8px 12px', borderRadius: '12px 12px 3px 12px', fontSize: 13, lineHeight: 1.5, maxWidth: '80%' }}>{chatMsg}</div>
+        </div>
+        <div style={{ display: 'flex', gap: 7 }}>
+          <div style={{ width: 24, height: 24, borderRadius: 7, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, flexShrink: 0, alignSelf: 'flex-end' }}>{companion.emoji}</div>
+          <div style={{ background: '#fff', padding: '8px 12px', borderRadius: '12px 12px 12px 3px', fontSize: 13, lineHeight: 1.5, color: 'var(--c-text)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', maxWidth: '80%' }}>{reply}</div>
+        </div>
+      </div>
+      <div style={{ padding: '10px 14px', borderTop: '1px solid #E2E2E0', display: 'flex', gap: 8, background: '#fff' }}>
+        <div style={{ flex: 1, background: '#F5F5F5', borderRadius: 9, padding: '8px 12px', fontSize: 14, color: 'var(--c-text-muted)' }}>Type your message...</div>
+        <div style={{ width: 34, height: 34, borderRadius: 9, background: siteColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M14 8L2 2l2 6-2 6 12-6z" fill="white" /></svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HeroContent({ featured, onSelect }) {
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setActiveIdx((i) => (i + 1) % HERO_PREVIEWS.length), 3500);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="hero-content-inner" style={{ padding: '48px 80px 60px 80px', position: 'relative', zIndex: 5, height: 460 }}>
+      <div style={{ maxWidth: 520 }}>
+        <div className="hero-badge">✦ {COMPANIONS.length} AI Companions, ready to deploy</div>
+        <div className="hero-title">Try an AI Companion<br />for your business</div>
+        <div className="hero-sub">No code. No signup. Pick one from 41 ready-to-use companions for your industry and see how it will work on your website live!</div>
+        <div className="hero-pills" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {featured.map((c) =>
+            <button key={c.id} onClick={() => onSelect(c)} style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '9px 13px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7, color: '#fff', backdropFilter: 'blur(10px)', transition: 'all 0.16s' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.13)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.transform = 'none'; }}>
+              <span style={{ fontSize: 16 }}>{c.emoji}</span>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: 600, fontSize: 12 }}>{c.name}</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', marginTop: 1 }}>{c.industry}</div>
+              </div>
+            </button>
+          )}
+          <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '9px 13px', color: 'rgba(255,255,255,0.60)', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center' }}>
+            +{COMPANIONS.length - 4} more
+          </div>
+        </div>
+      </div>
+
+      <div className="hero-preview-col" style={{ position: 'absolute', top: 48, right: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.60)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}>
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', display: 'inline-block' }}></span>
+          Live companion preview
+        </div>
+        <HeroPreviewCard preview={HERO_PREVIEWS[activeIdx]} />
+        <div style={{ display: 'flex', gap: 6 }}>
+          {HERO_PREVIEWS.map((_, i) =>
+            <div key={i} onClick={() => setActiveIdx(i)} style={{ width: i === activeIdx ? 18 : 6, height: 6, borderRadius: 3, background: i === activeIdx ? '#0A7E74' : 'rgba(255,255,255,0.2)', cursor: 'pointer', transition: 'all 0.3s' }}></div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+function App() {
+  const [goal, setGoal] = useState('All');
+  const [industry, setIndustry] = useState('All Industries');
+  const [selected, setSelected] = useState(null);
+  const [showSignup, setShowSignup] = useState(false);
+
+  const featured = COMPANIONS.slice(0, 4);
+  const filtered = COMPANIONS.filter((c) => {
+    const mg = goal === 'All' || c.goal === goal;
+    const mi = industry === 'All Industries' || c.industry === industry;
+    return mg && mi;
+  });
+
+  return (
+    <div style={{ minHeight: '100%', background: '#F9F9F7', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+      {/* Hero */}
+      <div style={{ background: 'linear-gradient(155deg, #080E1C 0%, #071A17 55%, #0A2420 100%)', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: -80, right: 180, width: 480, height: 480, borderRadius: '50%', background: 'radial-gradient(circle, rgba(13,148,136,0.13) 0%, transparent 65%)', pointerEvents: 'none' }}></div>
+        <div style={{ position: 'absolute', bottom: -80, left: 60, width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%)', pointerEvents: 'none' }}></div>
+
+        <nav className="nav-inner" style={{ padding: '0 80px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 5 }}>
+          {/* Logo — clickable home */}
+          <button className="nav-logo-btn" onClick={() => { setGoal('All'); setIndustry('All Industries'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+            <WalrusLogo light />
+          </button>
+
+          {/* Center nav links */}
+          <div className="nav-links">
+            {['Solutions', 'Try', 'Careers', 'Partners', 'Contact'].map(label => (
+              <button key={label} className="nav-link"
+                onClick={() => label === 'Try' && window.scrollTo({ top: document.getElementById('companions-grid').offsetTop - 80, behavior: 'smooth' })}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <button className="nav-start-free" onClick={() => setShowSignup(true)}>
+            Start Free
+          </button>
+        </nav>
+
+        <HeroContent featured={featured} onSelect={setSelected} />
+
+        {/* Social proof bar */}
+        <div className="social-proof-bar" style={{ background: 'rgba(255,255,255,0.04)', borderTop: '1px solid rgba(255,255,255,0.06)', padding: 'var(--space-3) var(--page-pad)', display: 'flex', alignItems: 'center', gap: 'var(--space-10)', position: 'relative', zIndex: 5 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', display: 'inline-block', flexShrink: 0 }}></span>
+            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.82)' }}><strong style={{ color: '#fff' }}>47 businesses</strong> tried a companion in the last 24 hours</span>
+          </div>
+          <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.1)' }}></div>
+          {[['✓', 'Free to try'], ['✓', '₹9k/mo after'], ['✓', 'Cancel anytime']].map(([icon, label]) =>
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>
+              <span style={{ color: '#0A7E74', fontWeight: 700 }}>{icon}</span> {label}
+            </div>
+          )}
+          <div className="social-proof-stats" style={{ marginLeft: 'auto', display: 'flex', gap: 28 }}>
+            {[['150+', 'SMEs using Walrus'], ['50K+', 'Chats handled'], ['5 min', 'Avg. setup time']].map(([n, l]) =>
+              <div key={l} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '-0.3px' }}>{n}</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.60)', marginTop: 2, fontWeight: 500 }}>{l}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Filter bar */}
+      <div style={{ background: '#fff', borderBottom: '1px solid #E2E2E0', padding: 'var(--space-3) var(--page-pad)', position: 'sticky', top: 0, zIndex: 19 }}>
+        <div className="filter-bar-inner" style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <div className="filter-chips" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {GOALS.map((g) =>
+              <button key={g} onClick={() => setGoal(g)} style={{ padding: '6px 14px', borderRadius: 20, border: `1.5px solid ${goal === g ? '#0A7E74' : '#E2E2E0'}`, background: goal === g ? '#0A7E74' : 'transparent', color: goal === g ? '#fff' : '#636369', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.14s' }}>{g}</button>
+            )}
+          </div>
+          <div style={{ width: 1, height: 20, background: '#E2E2E0' }}></div>
+          <select className="filter-industry" value={industry} onChange={(e) => setIndustry(e.target.value)} style={{ padding: '7px 12px', border: '1.5px solid #E2E2E0', borderRadius: 9, fontSize: 13, fontFamily: 'inherit', outline: 'none', color: 'var(--c-text)', background: '#fff', cursor: 'pointer' }}>
+            {INDUSTRIES.map((i) => <option key={i}>{i}</option>)}
+          </select>
+          <span style={{ fontSize: 14, color: 'var(--c-text-muted)', marginLeft: 'auto', fontWeight: 500 }}>{filtered.length} companions</span>
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div id="companions-grid" style={{ padding: 'var(--space-10) var(--page-pad) var(--space-16)' }}>
+        <div className="card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+          {filtered.map((c) => {
+            const accent = hueToColor(c.hue);
+            const bg = hueToBg(c.hue);
+            return (
+              <div key={c.id}
+                style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #E2E2E0', padding: '20px', cursor: 'pointer', transition: 'all 0.16s' }}
+                onClick={() => setSelected(c)}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 22px rgba(0,0,0,0.07)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#E2E2E0'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <div style={{ width: 42, height: 42, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>{c.emoji}</div>
+                  <span style={{ fontSize: 11, background: bg, color: accent, padding: '3px 8px', borderRadius: 20, fontWeight: 700, border: `1px solid ${hueToBorder(c.hue)}` }}>{c.industry}</span>
+                </div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--c-text)', marginBottom: 5, letterSpacing: '-0.2px', lineHeight: 1.3 }}>{c.name}</div>
+                <div style={{ fontSize: 14, color: 'var(--c-text-muted)', lineHeight: 1.55, marginBottom: 16 }}>{c.shortDesc}</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 12, color: 'var(--c-text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: accent, display: 'inline-block' }}></span>
+                    {c.goal}
+                  </span>
+                  <button onClick={(e) => { e.stopPropagation(); setSelected(c); }} style={{ fontSize: 12, color: accent, background: bg, border: `1px solid ${hueToBorder(c.hue)}`, padding: '5px 12px', borderRadius: 7, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.14s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = accent; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = accent; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = bg; e.currentTarget.style.color = accent; e.currentTarget.style.borderColor = hueToBorder(c.hue); }}>
+                    Preview →
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {filtered.length === 0 &&
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--c-text-muted)' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🔍</div>
+            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--c-text-muted)' }}>No companions match these filters</div>
+            <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting the goal or industry filter</div>
+          </div>
+        }
+      </div>
+
+      {selected && <WebsitePreviewModal companion={selected} onClose={() => setSelected(null)} onUse={() => { setSelected(null); setShowSignup(true); }} />}
+      {showSignup && <SignupModal onClose={() => setShowSignup(false)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
